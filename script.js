@@ -10,9 +10,6 @@ let facingMode = "environment";
 let imageData = "";
 let originalImageData = "";
 let frameEnabled = false;
-const coupleImg = new Image();
-coupleImg.crossOrigin = "anonymous";
-coupleImg.src = "./couple.png";
 
 function show(id){ screens.forEach(s => $(s).classList.toggle("hidden", s !== id)); }
 function status(msg){ $("status").textContent = msg || ""; }
@@ -54,6 +51,8 @@ function loadFile(file){
       let w=img.width,h=img.height;
       if(Math.max(w,h)>max){ const r=max/Math.max(w,h); w=Math.round(w*r); h=Math.round(h*r); }
       canvas.width=w; canvas.height=h; ctx.drawImage(img,0,0,w,h);
+      originalImageData = canvas.toDataURL("image/jpeg", .9);
+      imageData = originalImageData;
       frameEnabled = false;
       $("frameBtn").textContent = "🌿 Frame: OFF";
       show("previewScreen"); status("Preview ready.");
@@ -73,21 +72,7 @@ function toggleFrame(){
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
     if(frameEnabled){
-      if (coupleImg.complete && coupleImg.naturalWidth > 0) {
-        drawBottomFrame();
-        imageData = canvas.toDataURL("image/jpeg", .9);
-      } else {
-        coupleImg.onload = () => {
-          drawBottomFrame();
-          imageData = canvas.toDataURL("image/jpeg", .9);
-        };
-      
-        coupleImg.onerror = () => {
-          drawBottomFrame();
-          imageData = canvas.toDataURL("image/jpeg", .9);
-          status("Frame added, but couple.png was not found.");
-        };
-      }
+      drawBottomFrame();
       $("frameBtn").textContent = "🌿 Frame: ON";
       status("Small bottom frame added.");
     } else {
@@ -104,39 +89,29 @@ function drawBottomFrame(){
   const w = canvas.width;
   const h = canvas.height;
 
-  const frameHeight = Math.round(h * 0.16);
+  const frameHeight = Math.round(h * 0.13); // small bottom only
   const y = h - frameHeight;
 
   ctx.save();
 
-  // Cream bottom frame
-  ctx.fillStyle = "rgba(255, 250, 242, 0.92)";
+  // Soft cream background
+  ctx.fillStyle = "rgba(255, 250, 242, 0.88)";
   ctx.fillRect(0, y, w, frameHeight);
 
-  // Champagne gold top line
+  // Thin gold top line
   ctx.fillStyle = "#d7c59a";
   ctx.fillRect(0, y, w, Math.max(3, Math.round(h * 0.003)));
 
-  // Couple image on the left
-  if (coupleImg.complete) {
-    const imgH = frameHeight * 1.15;
-    const imgW = imgH * (coupleImg.width / coupleImg.height);
-    const imgX = w * 0.04;
-    const imgY = y + frameHeight - imgH + h * 0.005;
-
-    ctx.drawImage(coupleImg, imgX, imgY, imgW, imgH);
-  }
-
-  // Text area
-  ctx.textAlign = "center";
-
+  // Names
   ctx.fillStyle = "#556b4f";
-  ctx.font = `${Math.round(w * 0.045)}px Georgia`;
-  ctx.fillText("#TheseBootzAreMadeForDelna", w * 0.58, y + frameHeight * 0.43);
+  ctx.textAlign = "center";
+  ctx.font = `${Math.round(w * 0.05)}px Georgia`;
+  ctx.fillText("#TheseBootzAreMadeForDelna", w / 2, y + frameHeight * 0.43);
 
+  // Date
   ctx.fillStyle = "#9b7c3e";
-  ctx.font = `${Math.round(w * 0.023)}px Georgia`;
-  ctx.fillText("July 16, 2026 ♡", w * 0.58, y + frameHeight * 0.68);
+  ctx.font = `${Math.round(w * 0.022)}px Georgia`;
+  ctx.fillText("July 16, 2026 ♡", w / 2, y + frameHeight * 0.68);
 
   ctx.restore();
 }
