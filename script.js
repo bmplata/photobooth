@@ -11,7 +11,8 @@ let imageData = "";
 let originalImageData = "";
 let frameEnabled = false;
 const coupleImg = new Image();
-coupleImg.src = "couple.png";
+coupleImg.crossOrigin = "anonymous";
+coupleImg.src = "./couple.png";
 
 function show(id){ screens.forEach(s => $(s).classList.toggle("hidden", s !== id)); }
 function status(msg){ $("status").textContent = msg || ""; }
@@ -74,10 +75,20 @@ function toggleFrame(){
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
     if(frameEnabled){
-      if (coupleImg.complete) {
+      if (coupleImg.complete && coupleImg.naturalWidth > 0) {
         drawBottomFrame();
+        imageData = canvas.toDataURL("image/jpeg", .9);
       } else {
-        coupleImg.onload = () => drawBottomFrame();
+        coupleImg.onload = () => {
+          drawBottomFrame();
+          imageData = canvas.toDataURL("image/jpeg", .9);
+        };
+      
+        coupleImg.onerror = () => {
+          drawBottomFrame();
+          imageData = canvas.toDataURL("image/jpeg", .9);
+          status("Frame added, but couple.png was not found.");
+        };
       }
       $("frameBtn").textContent = "🌿 Frame: ON";
       status("Small bottom frame added.");
