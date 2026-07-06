@@ -54,8 +54,6 @@ function loadFile(file){
       let w=img.width,h=img.height;
       if(Math.max(w,h)>max){ const r=max/Math.max(w,h); w=Math.round(w*r); h=Math.round(h*r); }
       canvas.width=w; canvas.height=h; ctx.drawImage(img,0,0,w,h);
-      originalImageData = canvas.toDataURL("image/jpeg", .9);
-      imageData = originalImageData;
       frameEnabled = false;
       $("frameBtn").textContent = "🌿 Frame: OFF";
       show("previewScreen"); status("Preview ready.");
