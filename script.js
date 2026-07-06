@@ -111,7 +111,7 @@ function drawBottomFrame(){
   // Date
   ctx.fillStyle = "#9b7c3e";
   ctx.font = `${Math.round(w * 0.022)}px Georgia`;
-  ctx.fillText("July 16, 2026 · Oriental Mindoro", w / 2, y + frameHeight * 0.68);
+  ctx.fillText("July 16, 2026", w / 2, y + frameHeight * 0.68);
 
   // Small heart
   ctx.fillStyle = "#b39654";
