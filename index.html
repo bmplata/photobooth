@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#6f7f5f" />
+  <title>Bootz & Delna Photo Booth</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <section class="hero" id="welcomeScreen">
+      <div class="leaf leaf-top">❦</div>
+      <p class="eyebrow">Wedding Photo Booth</p>
+      <h1>Bootz & Delna</h1>
+      <p class="date">July 16, 2026 · Oriental Mindoro</p>
+      <button class="primary" id="startBtn">📸 Start Photo Booth</button>
+      <button class="secondary" id="uploadFileBtn">Choose / Take Photo</button>
+      <input id="fileInput" type="file" accept="image/*" capture="environment" hidden />
+      <p class="hint">Best opened directly in Chrome or Safari, not inside Facebook/Messenger/Canva preview.</p>
+    </section>
+
+    <section class="screen hidden" id="cameraScreen">
+      <div class="topbar">
+        <button class="icon" id="backBtn">←</button>
+        <span>Camera</span>
+        <button class="icon" id="switchBtn">↺</button>
+      </div>
+      <div class="camera-wrap">
+        <video id="video" autoplay playsinline muted></video>
+        <div class="countdown hidden" id="countdown">3</div>
+      </div>
+      <button class="shutter" id="captureBtn" aria-label="Capture"></button>
+      <p class="hint">Tap capture. If camera does not open, use “Choose / Take Photo” on the first page.</p>
+    </section>
+
+    <section class="screen hidden" id="previewScreen">
+      <h2>Preview</h2>
+      <canvas id="canvas"></canvas>
+      <div class="actions">
+        <input id="guestName" placeholder="Your name, optional" maxlength="40" />
+        <button class="secondary" id="frameBtn">Add Wedding Frame</button>
+        <button class="primary" id="uploadBtn">Upload Photo</button>
+        <button class="danger" id="retakeBtn">Retake / Cancel</button>
+      </div>
+      <p class="status" id="status"></p>
+    </section>
+
+    <section class="hero hidden" id="thanksScreen">
+      <div class="heart">♡</div>
+      <h1>Thank you!</h1>
+      <p>Your photo has been saved to our wedding album.</p>
+      <button class="primary" id="againBtn">Take Another Photo</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

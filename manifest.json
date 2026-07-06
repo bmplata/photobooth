@@ -1,0 +1,9 @@
+{
+  "name": "Bootz & Delna Photo Booth",
+  "short_name": "Wedding Booth",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4efe6",
+  "theme_color": "#6f7f5f",
+  "icons": []
+}
