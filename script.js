@@ -106,17 +106,12 @@ function drawBottomFrame(){
   ctx.fillStyle = "#556b4f";
   ctx.textAlign = "center";
   ctx.font = `${Math.round(w * 0.05)}px Georgia`;
-  ctx.fillText("Bootz & Delna", w / 2, y + frameHeight * 0.43);
+  ctx.fillText("#TheseBootzAreMadeForDelna", w / 2, y + frameHeight * 0.43);
 
   // Date
   ctx.fillStyle = "#9b7c3e";
   ctx.font = `${Math.round(w * 0.022)}px Georgia`;
-  ctx.fillText("July 16, 2026", w / 2, y + frameHeight * 0.68);
-
-  // Small heart
-  ctx.fillStyle = "#b39654";
-  ctx.font = `${Math.round(w * 0.03)}px Georgia`;
-  ctx.fillText("♡", w / 2, y + frameHeight * 0.88);
+  ctx.fillText("July 16, 2026 ♡", w / 2, y + frameHeight * 0.68);
 
   ctx.restore();
 }
