@@ -10,6 +10,8 @@ let facingMode = "environment";
 let imageData = "";
 let originalImageData = "";
 let frameEnabled = false;
+const coupleImg = new Image();
+coupleImg.src = "couple.png";
 
 function show(id){ screens.forEach(s => $(s).classList.toggle("hidden", s !== id)); }
 function status(msg){ $("status").textContent = msg || ""; }
@@ -72,7 +74,11 @@ function toggleFrame(){
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
     if(frameEnabled){
-      drawBottomFrame();
+      if (coupleImg.complete) {
+        drawBottomFrame();
+      } else {
+        coupleImg.onload = () => drawBottomFrame();
+      }
       $("frameBtn").textContent = "🌿 Frame: ON";
       status("Small bottom frame added.");
     } else {
@@ -89,29 +95,39 @@ function drawBottomFrame(){
   const w = canvas.width;
   const h = canvas.height;
 
-  const frameHeight = Math.round(h * 0.13); // small bottom only
+  const frameHeight = Math.round(h * 0.16);
   const y = h - frameHeight;
 
   ctx.save();
 
-  // Soft cream background
-  ctx.fillStyle = "rgba(255, 250, 242, 0.88)";
+  // Cream bottom frame
+  ctx.fillStyle = "rgba(255, 250, 242, 0.92)";
   ctx.fillRect(0, y, w, frameHeight);
 
-  // Thin gold top line
+  // Champagne gold top line
   ctx.fillStyle = "#d7c59a";
   ctx.fillRect(0, y, w, Math.max(3, Math.round(h * 0.003)));
 
-  // Names
-  ctx.fillStyle = "#556b4f";
-  ctx.textAlign = "center";
-  ctx.font = `${Math.round(w * 0.05)}px Georgia`;
-  ctx.fillText("#TheseBootzAreMadeForDelna", w / 2, y + frameHeight * 0.43);
+  // Couple image on the left
+  if (coupleImg.complete) {
+    const imgH = frameHeight * 1.15;
+    const imgW = imgH * (coupleImg.width / coupleImg.height);
+    const imgX = w * 0.04;
+    const imgY = y + frameHeight - imgH + h * 0.005;
 
-  // Date
+    ctx.drawImage(coupleImg, imgX, imgY, imgW, imgH);
+  }
+
+  // Text area
+  ctx.textAlign = "center";
+
+  ctx.fillStyle = "#556b4f";
+  ctx.font = `${Math.round(w * 0.045)}px Georgia`;
+  ctx.fillText("#TheseBootzAreMadeForDelna", w * 0.58, y + frameHeight * 0.43);
+
   ctx.fillStyle = "#9b7c3e";
-  ctx.font = `${Math.round(w * 0.022)}px Georgia`;
-  ctx.fillText("July 16, 2026 ♡", w / 2, y + frameHeight * 0.68);
+  ctx.font = `${Math.round(w * 0.023)}px Georgia`;
+  ctx.fillText("July 16, 2026 ♡", w * 0.58, y + frameHeight * 0.68);
 
   ctx.restore();
 }
