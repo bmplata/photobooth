@@ -1,4 +1,3 @@
-// Paste your deployed Google Apps Script Web App URL here.
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwG9eFb9ZQvUB-Cz-IEayE9SLqmU0fS5pQ-FQRHKdvWTzxddQ-6arYBcBdl7QG_TVGr/exec";
 
 const $ = (id) => document.getElementById(id);
@@ -9,7 +8,8 @@ const ctx = canvas.getContext("2d");
 let stream = null;
 let facingMode = "environment";
 let imageData = "";
-let frameAdded = false;
+let originalImageData = "";
+let frameEnabled = false;
 
 function show(id){ screens.forEach(s => $(s).classList.toggle("hidden", s !== id)); }
 function status(msg){ $("status").textContent = msg || ""; }
@@ -36,8 +36,11 @@ function captureFromVideo(){
   canvas.width = video.videoWidth || 1200;
   canvas.height = video.videoHeight || 1600;
   ctx.drawImage(video,0,0,canvas.width,canvas.height);
-  imageData = canvas.toDataURL("image/jpeg", .9);
-  frameAdded=false; stopCamera(); show("previewScreen"); status("Preview ready.");
+  originalImageData = canvas.toDataURL("image/jpeg", .9);
+  imageData = originalImageData;
+  frameEnabled = false;
+  $("frameBtn").textContent = "🌿 Frame: OFF";
+  stopCamera(); show("previewScreen"); status("Preview ready.");
 }
 function loadFile(file){
   const reader = new FileReader();
@@ -48,25 +51,89 @@ function loadFile(file){
       let w=img.width,h=img.height;
       if(Math.max(w,h)>max){ const r=max/Math.max(w,h); w=Math.round(w*r); h=Math.round(h*r); }
       canvas.width=w; canvas.height=h; ctx.drawImage(img,0,0,w,h);
-      imageData=canvas.toDataURL("image/jpeg",.9); frameAdded=false; show("previewScreen"); status("Preview ready.");
+      originalImageData = canvas.toDataURL("image/jpeg", .9);
+      imageData = originalImageData;
+      frameEnabled = false;
+      $("frameBtn").textContent = "🌿 Frame: OFF";
+      show("previewScreen"); status("Preview ready.");
     };
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
-function addFrame(){
-  if(frameAdded) return;
-  const w=canvas.width,h=canvas.height;
+function toggleFrame(){
+  if(!originalImageData) return;
+
+  frameEnabled = !frameEnabled;
+
+  const img = new Image();
+  img.onload = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    if(frameEnabled){
+      drawBottomFrame();
+      $("frameBtn").textContent = "🌿 Frame: ON";
+      status("Small bottom frame added.");
+    } else {
+      $("frameBtn").textContent = "🌿 Frame: OFF";
+      status("Frame removed.");
+    }
+
+    imageData = canvas.toDataURL("image/jpeg", .9);
+  };
+
+  img.src = originalImageData;
+}
+function drawBottomFrame(){
+  const w = canvas.width;
+  const h = canvas.height;
+
+  const frameHeight = Math.round(h * 0.13); // small bottom only
+  const y = h - frameHeight;
+
   ctx.save();
-  ctx.lineWidth=Math.max(16,Math.round(w*.025)); ctx.strokeStyle="#6f7f5f"; ctx.strokeRect(24,24,w-48,h-48);
-  ctx.lineWidth=Math.max(8,Math.round(w*.012)); ctx.strokeStyle="#d7c59a"; ctx.strokeRect(55,55,w-110,h-110);
-  ctx.fillStyle="rgba(255,250,242,.88)"; ctx.fillRect(0,h-160,w,160);
-  ctx.fillStyle="#556b4f"; ctx.textAlign="center";
-  ctx.font=`${Math.round(w*.07)}px Georgia`; ctx.fillText("Bootz & Delna",w/2,h-96);
-  ctx.font=`${Math.round(w*.032)}px Georgia`; ctx.fillText("July 16, 2026 · Oriental Mindoro",w/2,h-52);
-  ctx.fillStyle="#b39654"; ctx.font=`${Math.round(w*.035)}px Georgia`; ctx.fillText("♡",w/2,h-24);
+
+  // Soft cream background
+  ctx.fillStyle = "rgba(255, 250, 242, 0.88)";
+  ctx.fillRect(0, y, w, frameHeight);
+
+  // Thin gold top line
+  ctx.fillStyle = "#d7c59a";
+  ctx.fillRect(0, y, w, Math.max(3, Math.round(h * 0.003)));
+
+  // Names
+  ctx.fillStyle = "#556b4f";
+  ctx.textAlign = "center";
+  ctx.font = `${Math.round(w * 0.05)}px Georgia`;
+  ctx.fillText("Bootz & Delna", w / 2, y + frameHeight * 0.43);
+
+  // Date
+  ctx.fillStyle = "#9b7c3e";
+  ctx.font = `${Math.round(w * 0.022)}px Georgia`;
+  ctx.fillText("July 16, 2026 · Oriental Mindoro", w / 2, y + frameHeight * 0.68);
+
+  // Small heart
+  ctx.fillStyle = "#b39654";
+  ctx.font = `${Math.round(w * 0.03)}px Georgia`;
+  ctx.fillText("♡", w / 2, y + frameHeight * 0.88);
+
   ctx.restore();
-  imageData=canvas.toDataURL("image/jpeg",.9); frameAdded=true; status("Wedding frame added.");
+}
+function downloadPhotoToDevice(){
+  if(!imageData) return;
+
+  const name = ($("guestName").value || "Guest")
+    .replace(/[^\w\s-]/g, "")
+    .trim() || "Guest";
+
+  const link = document.createElement("a");
+  link.href = imageData;
+  link.download = `Bootz-Delna-Wedding-${name}.jpg`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 async function uploadPhoto(){
   if(!imageData){ status("Please take or choose a photo first."); return; }
@@ -77,12 +144,24 @@ async function uploadPhoto(){
     const res = await fetch(APPS_SCRIPT_URL, { method:"POST", body:JSON.stringify(payload), headers:{"Content-Type":"text/plain;charset=utf-8"} });
     const out = await res.json();
     if(!out.success) throw new Error(out.message || "Upload failed");
-    $("uploadBtn").disabled=false; show("thanksScreen");
+
+        downloadPhotoToDevice();
+
+        $("uploadBtn").disabled = false;
+        show("thanksScreen");
   }catch(e){
     $("uploadBtn").disabled=false; status("Upload failed: " + e.message);
   }
 }
-function reset(){ imageData=""; frameAdded=false; $("guestName").value=""; status(""); show("welcomeScreen"); }
+function reset(){
+  imageData="";
+  originalImageData="";
+  frameEnabled=false;
+  $("frameBtn").textContent = "🌿 Frame: OFF";
+  $("guestName").value="";
+  status("");
+  show("welcomeScreen");
+}
 
 $("startBtn").onclick=startCamera;
 $("switchBtn").onclick=switchCamera;
@@ -90,7 +169,7 @@ $("captureBtn").onclick=countdownThenCapture;
 $("backBtn").onclick=()=>{stopCamera();show("welcomeScreen")};
 $("uploadFileBtn").onclick=()=>$("fileInput").click();
 $("fileInput").onchange=(e)=>{ const f=e.target.files[0]; if(f) loadFile(f); e.target.value=""; };
-$("frameBtn").onclick=addFrame;
+$("frameBtn").onclick=toggleFrame;
 $("uploadBtn").onclick=uploadPhoto;
 $("retakeBtn").onclick=reset;
 $("againBtn").onclick=reset;
